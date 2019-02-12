@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="false" scan="true" scanPeriod="60 seconds">
+    <!--定义日志文件的存储地址 勿在 LogBack 的配置中使用相对路径 /app/sv/logs -->
+    <property name="LOG_HOME" value="${runtime.logback.filePath}"/>
+    <property name="LOG_NAME" value="${runtime.systemAlias}"/>
+
+    <!-- 控制台输出 -->
+    <appender name="STDOUT" class="com.huanshare.tools.logback.appender.HuanshareConsoleAppender">
+        <filter class="com.huanshare.tools.logback.filter.HuanshareThresholdFilter">
+            <levels>${runtime.logback.consoleLevels}</levels>
+        </filter>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符 -->
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{50} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- 文件日志 -->
+    <appender name="FILE-APPENDER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <filter class="com.huanshare.tools.logback.filter.HuanshareThresholdFilter">
+            <levels>${runtime.logback.fileLevels}</levels>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!--日志文件输出的文件名 -->
+            <FileNamePattern>${LOG_HOME}/${LOG_NAME}.%d{yyyy-MM-dd}-%i.log</FileNamePattern>
+            <!--日志文件保留天数 -->
+            <MaxHistory>10</MaxHistory>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>200MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <ImmediateFlush>false</ImmediateFlush>
+            <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符 -->
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{50} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- 异步输出 -->
+    <appender name="FILE-ASYNC-APPLICATION" class="ch.qos.logback.classic.AsyncAppender">
+        <!-- 不丢失日志.默认的,如果队列的80%已满,则会丢弃TRACT、DEBUG、INFO级别的日志-->
+        <discardingThreshold>0</discardingThreshold>
+        <!-- 更改默认的队列的深度,该值会影响性能.默认值为256-->
+        <queueSize>8096</queueSize>
+        <!-- 添加附加的appender,最多只能添加一个-->
+        <appender-ref ref="FILE-APPENDER"/>
+    </appender>
+
+
+    <logger name="com.huanshare" level="DEBUG" additivity="false">
+        <appender-ref ref="FILE-ASYNC-APPLICATION"/>
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
+</configuration>

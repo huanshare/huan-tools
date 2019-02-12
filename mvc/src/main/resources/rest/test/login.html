@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf8"/>
+    <title>Welcome To API Test Page</title>
+    <link type="text/css" rel="stylesheet" href="css/login.css">
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+</head>
+<body>
+<section class="container">
+    <div class="login">
+        <h1>Welcome To API Test Page</h1>
+
+        <form id="loginForm" method="post" autocomplete="off">
+            <p><input type="text" name="username" value=""></p>
+
+            <p><input type="password" name="password" value=""></p>
+
+            <p class="submit"><input type="button" name="loginBtn" value="Submit" id="loginBtn"></p>
+        </form>
+    </div>
+</section>
+<script type="text/javascript">
+    $(document).ready(function () {
+        function doPost() {
+            $.ajax({
+                type: 'POST',
+                url: "submitLogin",
+                data: $("#loginForm").serialize(),
+                success: function (data) {
+                    if ("success" == data) {
+                        location.href = "index.html";
+                    } else {
+                        alert("UserName or Password is wrong.");
+                    }
+                },
+                dataType: "text"
+            });
+        }
+
+        $("input[type!='button']").on('keydown', function (event) {
+            if (event.keyCode == 13) {
+                doPost();
+            }
+        });
+        $("#loginBtn").on('click', function () {
+            doPost();
+        });
+    });
+</script>
+</body>
+</html>

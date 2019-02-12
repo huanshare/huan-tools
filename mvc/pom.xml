@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.huanshare</groupId>
+    <artifactId>huan-tools-mvc</artifactId>
+    <packaging>jar</packaging>
+    <name>${project.artifactId} - ${project.version}</name>
+    <version>1.0.1-RELEASE</version>
+    <inceptionYear>2015</inceptionYear>
+    <url>http://www.huan.com</url>
+
+    <!--<distributionManagement>
+        <repository>
+            <id>nexus</id>
+            <name>Releases</name>
+            <url>http://10.0.2.102:8081/nexus/content/repositories/releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>nexus</id>
+            <name>Snapshots</name>
+            <url>http://10.0.2.102:8081/nexus/content/repositories/snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>-->
+
+    <build>
+        <defaultGoal>install</defaultGoal>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-eclipse-plugin</artifactId>
+                <version>2.9</version>
+                <configuration>
+                    <downloadSources>true</downloadSources>
+                    <downloadJavadocs>true</downloadJavadocs>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.5.1</version>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <version>2.7</version>
+                <artifactId>maven-resources-plugin</artifactId>
+                <configuration>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+
+        </plugins>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <excludes>
+                    <exclude>**/applicationContext-resources-*.xml</exclude>
+                </excludes>
+            </resource>
+        </resources>
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <filtering>true</filtering>
+            </testResource>
+        </testResources>
+    </build>
+
+    <!-- 工具类 -->
+    <dependencies>
+
+        <dependency>
+            <groupId>com.huanshare</groupId>
+            <artifactId>huan-tools-common</artifactId>
+            <version>${huan.tools.common.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.huanshare</groupId>
+            <artifactId>huan-tools-redis</artifactId>
+            <version>${huan.tools.redis.version}</version>
+        </dependency>
+        <!--<dependency>
+            <groupId>com.huan</groupId>
+            <artifactId>huanshare-tools-cat</artifactId>
+            <version>${huanshare.tools.cat.version}</version>
+        </dependency>-->
+        <dependency>
+            <groupId>com.huanshare</groupId>
+            <artifactId>huan-tools-valid</artifactId>
+            <version>${huan.tools.valid.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.huanshare</groupId>
+            <artifactId>huan-tools-mapper</artifactId>
+            <version>${huan.tools.mapper.version}</version>
+        </dependency>
+
+        <!-- spring -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+
+        <!-- fastjson -->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+            <version>1.2.8</version>
+        </dependency>
+
+        <!-- 反射扩展-->
+        <dependency>
+            <groupId>org.javassist</groupId>
+            <artifactId>javassist</artifactId>
+            <version>3.20.0-GA</version>
+        </dependency>
+    </dependencies>
+
+    <properties>
+        <spring.version>4.2.3.RELEASE</spring.version>
+        <huan.tools.common.version>1.0.1-RELEASE</huan.tools.common.version>
+        <huan.tools.redis.version>1.0.1-RELEASE</huan.tools.redis.version>
+       <!-- <huanshare.tools.cat.version>1.0.1-RELEASE</huanshare.tools.cat.version>-->
+        <huan.tools.valid.version>1.0.1-RELEASE</huan.tools.valid.version>
+        <huan.tools.mapper.version>1.0.1-RELEASE</huan.tools.mapper.version>
+        <slf4j.version>1.7.2</slf4j.version>
+        <logback.version>1.1.3</logback.version>
+    </properties>
+
+</project>

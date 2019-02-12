@@ -1,0 +1,151 @@
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!-- 引入配置文件 -->
+    <context:property-placeholder location="classpath*:*.properties"/>
+
+    <!-- spring可以自动去扫描base-pack下面或者子包下面的java文件，如果扫描到有@Component @Controller @Service等这些注解的类，则把这些类注册为bean -->
+    <context:component-scan base-package="com.huanshare.springMvcDemo"/>
+    <!-- 任务扫描-->
+    <task:annotation-driven/>
+
+    <context:property-placeholder ignore-resource-not-found="true" location="classpath:runtime.properties" file-encoding="utf-8"/>
+    <!-- Rest Template -->
+    <bean id="restTemplate" class="org.springframework.web.client.RestTemplate">
+        <property name="messageConverters">
+            <list>
+                <bean id="jsonConverter"
+                      class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+                    <property name="supportedMediaTypes">
+                        <list>
+                            <value>text/html;charset=UTF-8</value>
+                            <value>application/json; charset=UTF-8</value>
+                        </list>
+                    </property>
+                </bean>
+            </list>
+        </property>
+    </bean>
+    <!-- 数据源 -->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
+        <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+        <property name="url" value="jdbc:mysql://10.6.51.73:3306/huanshare?autoReconnect=true&amp;characterEncoding=utf8&amp;useSSL=false&amp;serverTimezone=UTC&amp;rewriteBatchedStatements=true"/>
+        <property name="username" value="root"/>
+        <property name="password" value="123456"/>
+        <property name="initialSize" value="10"/>
+        <property name="minIdle" value="10" />
+        <property name="maxActive" value="30"/>
+        <property name="maxWait" value="60000" />
+        <property name="timeBetweenEvictionRunsMillis" value="60000" />
+        <property name="minEvictableIdleTimeMillis" value="300000" />
+        <property name="validationQuery" value="SELECT 'x'" />
+        <property name="testWhileIdle" value="true" />
+        <property name="testOnBorrow" value="false" />
+        <property name="testOnReturn" value="false" />
+        <property name="poolPreparedStatements" value="true" />
+        <property name="maxPoolPreparedStatementPerConnectionSize" value="20" />
+        <property name="filters" value="stat" />
+    </bean>
+
+    <!-- 事物驱动 -->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <!-- 事物模板 -->
+    <bean id="transactionTemplate" class="org.springframework.transaction.support.TransactionTemplate">
+        <property name="transactionManager" ref="transactionManager"/>
+    </bean>
+
+    <!-- mybatis mapper 映射-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.huanshare.springMvcDemo.mapper"/>
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+    </bean>
+    <!-- mybatis SqlSessionFactory 映射-->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="typeAliasesPackage" value="com.huanshare.springMvcDemo.mapper"/>
+        <property name="plugins">
+            <list>
+                <ref bean="pageableInterceptor"/>
+                <ref bean="dbTimeInterceptor"/>
+            </list>
+        </property>
+        <property name="mapperLocations" value="classpath:mappers/*Mapper.xml"/>
+    </bean>
+    <!-- mybatis 分页插件 -->
+    <bean name="pageableInterceptor" class="com.huanshare.tools.mybatis.page.PageableInterceptor">
+        <property name="properties">
+            <props>
+                <prop key="dialectClass">com.huanshare.tools.mybatis.page.MySQLDialect</prop>
+            </props>
+        </property>
+    </bean>
+    <bean name="dbTimeInterceptor" class="com.huanshare.tools.mybatis.dbtime.DBTimeInterceptor">
+        <property name="properties">
+            <props>
+                <prop key="dialectClass">com.huanshare.tools.mybatis.dbtime.MySQLDBTimeDialect</prop>
+            </props>
+        </property>
+    </bean>
+
+    <!-- redis -->
+    <bean id="jedisFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory">
+        <property name="hostName" value="10.0.21.58" />
+        <property name="port" value="6379" />
+<!--        <property name="password" value="${redis.password}" />-->
+        <property name="poolConfig" ref="poolConfig"/>
+    </bean>
+
+    <bean id="poolConfig" class="redis.clients.jedis.JedisPoolConfig">
+        <property name="maxIdle" value="2"/>
+        <property name="minIdle" value="1"/>
+
+        <property name="testOnBorrow" value="1"/>
+        <property name="testOnReturn" value="1"/>
+    </bean>
+
+    <bean id="redisTemplate" class="org.springframework.data.redis.core.StringRedisTemplate">
+        <property name="connectionFactory" ref="jedisFactory"/>
+        <property name="keySerializer">
+            <bean class="org.springframework.data.redis.serializer.StringRedisSerializer" />
+        </property>
+        <property name="valueSerializer">
+            <bean class="org.springframework.data.redis.serializer.JdkSerializationRedisSerializer" />
+        </property>
+        <property name="hashKeySerializer">
+            <bean class="org.springframework.data.redis.serializer.StringRedisSerializer"/>
+        </property>
+        <property name="hashValueSerializer">
+            <bean class="org.springframework.data.redis.serializer.JdkSerializationRedisSerializer"/>
+        </property>
+    </bean>
+
+    <!-- 工具类 -->
+    <bean id="redisService" class="com.huanshare.tools.redis.RedisService">
+        <property name="redisTemplate" ref="redisTemplate"/>
+    </bean>
+
+    <!-- 统一异常处理 -->
+    <bean id="restControllerAdvice" class="com.huanshare.tools.mvc.advice.RestControllerAdvice"/>
+
+    <!-- LogBack 启动加载-->
+    <bean id="huanshareLogContextInitializing" class="com.huanshare.tools.logback.HuanshareLogContextInitializing">
+        <property name="filePath" value="config/logback.xml"/>
+        <property name="properties">
+            <map>
+                <entry key="runtime.logback.filePath" value="/tomcat_logs"/>
+                <entry key="runtime.systemAlias" value="_spring-mvc-demo"/>
+                <entry key="runtime.logback.consoleLevels" value="DEBUG;INFO;ERROR;WARN"/>
+                <entry key="runtime.logback.fileLevels" value="DEBUG;INFO;ERROR;WARN"/>
+            </map>
+        </property>
+    </bean>
+
+</beans>

@@ -1,0 +1,69 @@
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns="http://www.springframework.org/schema/beans" xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!-- 引入配置文件 -->
+    <context:property-placeholder location="classpath*:*.properties"/>
+    <context:component-scan base-package="com.huanshare.springMvcDemo"/>
+
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/pages"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+
+    <mvc:annotation-driven>
+        <mvc:message-converters register-defaults="true">
+            <!-- 将StringHttpMessageConverter的默认编码设为UTF-8 -->
+            <bean class="org.springframework.http.converter.StringHttpMessageConverter">
+                <constructor-arg value="UTF-8"/>
+            </bean>
+            <!-- 将Jackson2HttpMessageConverter的默认格式化输出设为true -->
+            <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+                <property name="prettyPrint" value="true"/>
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+    <!-- 对静态资源文件的访问 -->
+    <mvc:default-servlet-handler />
+    <mvc:resources mapping="/logo.png" location="/resources/logo.png" />
+
+    <!-- 请求参数拦截 -->
+    <bean id="paramsReturnHandler" class="com.huanshare.tools.mvc.aspect.params.ParamsReturnHandler"/>
+    <bean id="paramsAspectBean" class="com.huanshare.tools.mvc.aspect.params.ParamsAspect">
+        <property name="paramsReturnHandler" ref="paramsReturnHandler"/>
+    </bean>
+
+    <!-- 请求限流拦截 -->
+    <bean id="limitedAspectBean" class="com.huanshare.tools.mvc.aspect.LimitedAspect">
+        <property name="redisServiceUtil" ref="redisService"></property>
+    </bean>
+    <!-- 请求验证等级拦截 -->
+    <bean id="restLevelAspectBean" class="com.huanshare.tools.mvc.aspect.RestLevelAspect"/>
+    <!-- 接口参数验证拦截 -->
+    <bean id="validatorAspectBean" class="com.huanshare.tools.valid.aspect.ValidatorAspect"/>
+
+    <aop:config proxy-target-class="false">
+        <aop:aspect id="paramsAspect" ref="paramsAspectBean">
+            <aop:pointcut id="paramsAspect" expression="execution(* com.huanshare.springMvcDemo.controller.*.*(..))"/>
+            <aop:around pointcut-ref="paramsAspect" method="processAspect"/>
+        </aop:aspect>
+        <aop:aspect id="limitedAspect" ref="limitedAspectBean">
+            <aop:pointcut id="limitedAspect" expression="execution(* com.huanshare.springMvcDemo.controller.*.*(..))"/>
+            <aop:around pointcut-ref="limitedAspect" method="processAspect"/>
+        </aop:aspect>
+        <aop:aspect id="restLevelAspect" ref="restLevelAspectBean">
+            <aop:pointcut id="restLevelAspect" expression="execution(* com.huanshare.springMvcDemo.controller.*.*(..))"/>
+            <aop:around pointcut-ref="restLevelAspect" method="processAspect"/>
+        </aop:aspect>
+        <aop:aspect id="validatorAspect" ref="validatorAspectBean">
+            <aop:pointcut id="validatorAspect" expression="execution(* com.huanshare.springMvcDemo.controller.*.*(..))"/>
+            <aop:around pointcut-ref="validatorAspect" method="processAspect"/>
+        </aop:aspect>
+    </aop:config>
+
+</beans>

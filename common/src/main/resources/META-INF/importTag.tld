@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<taglib xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-jsptaglibrary_2_1.xsd"
+        version="2.1">
+
+    <tlib-version>1.2</tlib-version>
+    <short-name>t</short-name>
+    <uri>http://java.sun.com/jsp/jstl/huanshare/tools</uri>
+
+    <tag>
+        <name>import</name>
+        <tag-class>com.huanshare.tools.tag.ImportTag</tag-class>
+        <body-content>JSP</body-content>
+        <attribute>
+            <name>url</name>
+            <required>yes</required>
+            <rtexprvalue>true</rtexprvalue>
+        </attribute>
+    </tag>
+
+</taglib>

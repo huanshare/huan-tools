@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf8" />
+    <title>Welcome To Rest Test Page</title>
+    <link type="text/css" rel="stylesheet" href="css/index.css">
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+</head>
+<body>
+<div class="bootstrap-frm">
+    <form id="requestForm" method="post" autocomplete="off" >
+        <label>
+            <span>Secret Level :</span>
+            <select name="secretLevel" id="secretLevel">
+                <option value="L1">L1</option>
+                <option value="L2">L2</option>
+                <!--<option value="L3">L3</option>-->
+            </select>
+        </label>
+        <label>
+            <span>Method Name :</span>
+            <select id="methodSelect" name="methodSelect">
+            </select>
+        </label>
+        <label style="display: none" id="tokenDiv">
+            <span>Token :</span>
+            <input type="text" name="token" id="token"/>
+        </label>
+        <label>
+            <span>Method Path :</span>
+            <input type="text" id="methodPath" name="methodPath" readonly="true"/>
+        </label>
+        <label>
+            <span>Body :</span>
+            <textarea type="textarea" id="bodyContent" name="bodyContent"></textarea>
+        </label>
+        <label>
+            <span></span>
+            <input type="button" id="submitBtn" value="Submit">
+        </label>
+    </form>
+    <label>
+        <span>Request Body(readonly) :</span>
+        <textarea type="textarea" name="requestContent" id="requestContent" readonly="readonly"></textarea>
+    </label>
+    <label>
+        <span>Result Body(readonly) :</span>
+        <textarea type="textarea" name="resultContent" id="resultContent" readonly="readonly"></textarea>
+    </label>
+    <label>
+        <span>Process Time(readonly) :</span>
+        <input type="text" name="useTime" id="useTime" readonly="readonly"></textarea>
+    </label>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        $("#submitBtn").on('click',function(){
+            $('#requestContent').val('');
+            $('#resultContent').val('');
+            $('#useTime').val('');
+            $.ajax({
+                type: 'POST',
+                url: 'submitRequest',
+                data: $('#requestForm').serialize(),
+                success: function(data) {
+                    if(data){
+                        if(data.isLoginSuccess != '1'){
+                            alert('Please login first.');
+                            location.href = "login.html";
+                            return false;
+                        }
+                        $('#requestContent').val(data.requestContent);
+                        $('#resultContent').val(data.resultContent);
+                        $('#useTime').val(data.useTime);
+                    }
+                },
+                dataType: 'json'
+            });
+        });
+        $("#secretLevel").on('change', function(){
+            if($('#secretLevel').val() === 'L3'){
+                $('#tokenDiv').show();
+            }else{
+                $('#tokenDiv').hide();
+            }
+        });
+        $("#methodSelect").on('change', function(){
+            $('#bodyContent').val(JSON.parse($('#methodSelect').val())['value']);
+            $('#methodPath').val(JSON.parse($('#methodSelect').val())['path']);
+        });
+
+        $.ajax({
+            type: 'POST',
+            url: 'loadMethodSelect',
+            success: function(data) {
+                if (data) {
+                    var methodSelect = $('#methodSelect');
+                    var i = 0;
+                    for (var key in data) {
+                        methodSelect.append("<option value='" + JSON.stringify(data[key]) + "'>" + key + "</option>");
+                        if (i == 0) {
+                            $('#bodyContent').val(data[key]['value']);
+                            $('#methodPath').val(data[key]['path']);
+                        }
+                        ++i;
+                    }
+                }
+            },
+            dataType: 'json'
+        });
+    });
+</script>
+</body>
+</html>
